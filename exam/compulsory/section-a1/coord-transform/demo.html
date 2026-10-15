@@ -16,7 +16,8 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{font-family:var(--cjk);color:var(--ink);background:#eef3f9;font-size:20px;-webkit-text-size-adjust:100%}
-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;background:#fff;border-bottom:4px solid var(--blue)}
+/* Sticky mode tabs so 「① 探究」 stays tappable while page scrolls (phone / stacked). */
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;background:#fff;border-bottom:4px solid var(--blue);position:sticky;top:0;z-index:30}
 h1{font-size:24px;margin:0;letter-spacing:1px}
 h1 small{font-size:16px;color:var(--muted);font-weight:normal;margin-left:8px}
 .tabs{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
@@ -30,13 +31,29 @@ button.ok{border-color:var(--green);color:var(--green)}
 .tab.on,.seg button.on{background:var(--blue);color:#fff}
 main{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:14px;padding:12px 16px;align-items:start}
 @media (max-width:1100px),(orientation:portrait){main{grid-template-columns:1fr}}
-@media (min-width:1101px) and (orientation:landscape){.panel{position:sticky;top:8px;max-height:calc(100vh - 90px);overflow-y:auto}}
+/*
+  Wide landscape (iPad Pro / desktop): lock the page to the visible viewport and
+  scroll each column on its own. Avoids sticky+100vh nested-scroll traps where the
+  sidebar top (探究 heading) and header mode tabs become unreachable.
+*/
+@media (min-width:1101px) and (orientation:landscape){
+  html,body{height:100%;height:100dvh;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  header{position:relative;top:auto;flex:0 0 auto}
+  main{flex:1 1 auto;min-height:0;overflow:hidden;align-items:stretch;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  main>.card{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .panel{position:relative;top:auto;max-height:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  svg#stage{max-height:none;min-height:min(380px,50dvh)}
+}
 .card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(30,60,110,.10);padding:12px 14px}
 .stagehead{display:flex;flex-direction:column;gap:6px;min-height:56px}
 .caption{font-size:20px;font-weight:bold;line-height:1.4}
 .caption .sub{display:block;font-size:15px;font-weight:normal;color:var(--muted);margin-top:2px;line-height:1.45}
 .stagewrap{position:relative}
-svg#stage{width:100%;height:auto;max-height:calc(100vh - 260px);min-height:380px;display:block;touch-action:manipulation;user-select:none;background:#fbfdff;border-radius:10px}
+svg#stage{width:100%;height:auto;max-height:calc(100dvh - 260px);max-height:calc(100vh - 260px);min-height:280px;display:block;touch-action:manipulation;user-select:none;background:#fbfdff;border-radius:10px}
+@media (max-width:1100px),(orientation:portrait){
+  svg#stage{min-height:240px;max-height:min(420px,calc(100dvh - 220px))}
+}
 .lbllayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
 .svglbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.2;
   text-shadow:0 0 2px #fff,0 0 3px #fff,1.5px 1.5px 0 #fff,-1.5px -1.5px 0 #fff,1.5px -1.5px 0 #fff,-1.5px 1.5px 0 #fff}
